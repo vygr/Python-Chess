@@ -195,7 +195,7 @@ def best_move(board, colour):
 	global start_time
 	all_boards = [(evaluate(new_board) * colour, new_board[:]) for new_board in all_moves(board, colour)]
 	if not all_boards:
-		return (None, True)
+		return None
 	all_boards = sorted(all_boards, key = itemgetter(0), reverse = True)
 	best_board, best_ply_board, start_time = board, board, time.time()
 	for ply in xrange(1, MAX_PLY):
@@ -204,7 +204,7 @@ def best_move(board, colour):
 		for new_board in all_boards:
 			score = -next_move(new_board[1], -colour, -beta, -alpha, ply - 1)
 			if (time.time() - start_time) > MAX_TIME_PER_MOVE:
-				return (best_board, False)
+				return best_board
 			if score > alpha:
 				alpha, best_ply_board = score, new_board[1]
 				print '\b*',
@@ -212,7 +212,7 @@ def best_move(board, colour):
 				print '\b.',
 			sys.stdout.flush()
 		best_board = best_ply_board
-	return (best_board, False)
+	return best_board
 
 def main():
 	history = []
@@ -222,8 +222,8 @@ def main():
 	display_board(board)
 	while True:
 		print 'White to move:' if colour == WHITE else 'Black to move:'
-		board, mate = best_move(board, colour)
-		if mate:
+		board = best_move(board, colour)
+		if not board:
 			print '\n** Checkmate **'
 			break
 		if board in history:
