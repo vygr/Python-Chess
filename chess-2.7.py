@@ -215,6 +215,7 @@ def best_move(board, colour):
 	return (best_board, False)
 
 def main():
+	history = []
 	board = array('c', 'rnbqkbnrpppppppp                                PPPPPPPPRNBQKBNR')
 	colour = WHITE
 	os.system(['clear','cls'][os.name=='nt'])
@@ -223,8 +224,12 @@ def main():
 		print 'White to move:' if colour == WHITE else 'Black to move:'
 		board, mate = best_move(board, colour)
 		if mate:
-			print '** Checkmate **'
+			print '\n** Checkmate **'
 			break
+		if board in history:
+			print '\n** Stalemate **'
+			break
+		history += [board[:]]
 		colour = -colour
 		os.system(['clear','cls'][os.name=='nt'])
 		display_board(board)
