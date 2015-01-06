@@ -21,6 +21,7 @@ piece_type = dict([(piece, WHITE if piece < 'a' else BLACK) for piece in 'kqrbnp
 unicode_pieces = dict(zip('KQRBNPkqrbnp ', [unichr(piece) for piece in xrange(9812, 9824)] + [' ']))
 
 def display_board(board):
+	os.system(['clear','cls'][os.name=='nt'])
 	print
 	print '  a   b   c   d   e   f   g   h'
 	print u'\u2501\u2501\u2501'.join([u'\u250f'] + [u'\u2533' for _ in xrange(7)] + [u'\u2513'])
@@ -104,24 +105,27 @@ moves = {'p' : black_pawn_moves, 'P' : white_pawn_moves, 'R' : rook_moves, 'r' :
 white_scans = [('qb', bishop_vectors), ('qr', rook_vectors), ('n', knight_vectors), ('k', king_vectors), ('p', white_pawn_vectors)]
 black_scans = [('QB', bishop_vectors), ('QR', rook_vectors), ('N', knight_vectors), ('K', king_vectors), ('P', black_pawn_vectors)]
 
-def in_check(board, colour):
+def in_check(board, colour, king_index):
 	if colour == BLACK:
 		king_piece, scans = 'k', black_scans
 	else:
 		king_piece, scans = 'K', white_scans
-	king_index = array.index(board, king_piece)
+	if board[king_index] != king_piece:
+		king_index = array.index(board, king_piece)
 	for test_pieces, vectors in scans:
 		pieces = [piece for piece in piece_scans(board, king_index, vectors)]
 		for piece in test_pieces:
 			if piece in pieces:
-				return True
-	return False
+				return True, king_index
+	return False, king_index
 
 def all_moves(board, colour):
+	king_index = 0
 	for index, piece in enumerate(board):
 		if piece_type[piece] == colour:
 			for new_board in piece_moves(board, index, moves[piece]):
-				if not in_check(new_board, colour):
+				check, king_index = in_check(new_board, colour, king_index)
+				if not check:
 					yield new_board
 
 piece_values = {'k' : (KING_VALUE, 0), 'K' : (0, KING_VALUE), 'q' : (QUEEN_VALUE, 0), 'Q' : (0, QUEEN_VALUE), \
@@ -183,12 +187,19 @@ def next_move(board, colour, alpha, beta, ply):
 	global start_time
 	if ply <= 0:
 		return evaluate(board) * colour
+	mate = True
 	for new_board in all_moves(board[:], colour):
+		mate = False
 		alpha = max(alpha, -next_move(new_board, -colour, -beta, -alpha, ply - 1))
 		if alpha >= beta:
 			break
 		if (time.time() - start_time) > MAX_TIME_PER_MOVE:
 			break
+	if mate:
+		mate, _ = in_check(board, colour, 0)
+		if mate:
+			return colour * KING_VALUE * -1000
+		return colour * KING_VALUE * 1000
 	return alpha
 
 def best_move(board, colour):
@@ -218,22 +229,29 @@ def main():
 	history = []
 	board = array('c', 'rnbqkbnrpppppppp                                PPPPPPPPRNBQKBNR')
 	colour = WHITE
-	os.system(['clear','cls'][os.name=='nt'])
 	display_board(board)
 	while True:
 		print 'White to move:' if colour == WHITE else 'Black to move:'
-		board = best_move(board, colour)
-		if not board:
-			print '\n** Checkmate **'
+		new_board = best_move(board, colour)
+		if not new_board:
+			check, _ = in_check(board, colour, 0)
+			if check:
+				print '\n** Checkmate **'
+			else:
+				print '\n** Stalemate **'
 			break
-		if board in history:
-			print '\n** Stalemate **'
+		draw = history.count(new_board)
+		if draw >= 3:
+			print '\n** Draw **'
 			break
-		history += [board[:]]
+		history += [new_board[:]]
+		for _ in range(3):
+			time.sleep(0.1)
+			display_board(board)
+			time.sleep(0.1)
+			display_board(new_board)
 		colour = -colour
-		os.system(['clear','cls'][os.name=='nt'])
-		display_board(board)
-		#raw_input()
+		board = new_board
 
 if __name__ == '__main__':
 	main()
