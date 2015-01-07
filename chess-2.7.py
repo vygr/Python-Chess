@@ -198,8 +198,8 @@ def next_move(board, colour, alpha, beta, ply):
 	if mate:
 		mate, _ = in_check(board, colour, 0)
 		if mate:
-			return colour * KING_VALUE * -1000
-		return colour * KING_VALUE * 1000
+			return colour * KING_VALUE * -100
+		return colour * KING_VALUE * 100
 	return alpha
 
 def best_move(board, colour):
@@ -211,7 +211,7 @@ def best_move(board, colour):
 	best_board, best_ply_board, start_time = board, board, time.time()
 	for ply in xrange(1, MAX_PLY):
 		print '\nPly =', ply
-		alpha, beta = -KING_VALUE * 100, KING_VALUE * 100
+		alpha, beta = -KING_VALUE * 10, KING_VALUE * 10
 		for new_board in all_boards:
 			score = -next_move(new_board[1], -colour, -beta, -alpha, ply - 1)
 			if (time.time() - start_time) > MAX_TIME_PER_MOVE:
@@ -240,8 +240,7 @@ def main():
 			else:
 				print '\n** Stalemate **'
 			break
-		draw = history.count(new_board)
-		if draw >= 3:
+		if history.count(new_board) >= 3:
 			print '\n** Draw **'
 			break
 		history += [new_board[:]]
