@@ -198,8 +198,8 @@ def next_move(board, colour, alpha, beta, ply):
 	if mate:
 		mate, _ = in_check(board, colour, 0)
 		if mate:
-			return colour * KING_VALUE * 100
-		return colour * KING_VALUE * -100
+			return KING_VALUE * -100
+		return KING_VALUE * 100
 	return alpha
 
 def best_move(board, colour):
