@@ -199,7 +199,7 @@ def next_move(board, colour, alpha, beta, ply):
 	if mate:
 		mate, _ = in_check(board, colour, 0)
 		if mate:
-			return -MATE_VALUE - ply)
+			return -MATE_VALUE - ply
 		return MATE_VALUE
 	return alpha
 
