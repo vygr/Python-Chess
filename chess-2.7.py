@@ -203,7 +203,7 @@ def next_move(board, colour, alpha, beta, ply):
 		return MATE_VALUE
 	return alpha
 
-def best_move(board, colour):
+def best_move(board, colour, history):
 	global start_time
 	all_boards = [(evaluate(new_board) * colour, new_board[:]) for new_board in all_moves(board, colour)]
 	if not all_boards:
@@ -214,7 +214,8 @@ def best_move(board, colour):
 		print '\nPly =', ply
 		alpha, beta = -MATE_VALUE * 10, MATE_VALUE * 10
 		for new_board in all_boards:
-			score = -next_move(new_board[1], -colour, -beta, -alpha, ply - 1)
+			rep = history.count(new_board[1])
+			score = -next_move(new_board[1], -colour, -beta, -alpha, ply - 1) - (rep * QUEEN_VALUE)
 			if (time.time() - start_time) > MAX_TIME_PER_MOVE:
 				return best_board
 			if score > alpha:
@@ -233,7 +234,7 @@ def main():
 	display_board(board)
 	while True:
 		print 'White to move:' if colour == WHITE else 'Black to move:'
-		new_board = best_move(board, colour)
+		new_board = best_move(board, colour, history)
 		if not new_board:
 			check, _ = in_check(board, colour, 0)
 			if check:
