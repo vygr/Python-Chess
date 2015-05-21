@@ -13,6 +13,7 @@ PIECE_VALUE_FACTOR = 3
 
 KING_VALUE, QUEEN_VALUE, ROOK_VALUE = 1000000, 9 * PIECE_VALUE_FACTOR, 5 * PIECE_VALUE_FACTOR
 BISHOP_VALUE, KNIGHT_VALUE, PAWN_VALUE = 3 * PIECE_VALUE_FACTOR, 3 * PIECE_VALUE_FACTOR, 1 * PIECE_VALUE_FACTOR
+MATE_VALUE = KING_VALUE * 10
 
 EMPTY, WHITE, BLACK = 0, 1, -1
 NO_CAPTURE, MAY_CAPTURE, MUST_CAPTURE = 0, 1, 2
@@ -198,8 +199,8 @@ def next_move(board, colour, alpha, beta, ply):
 	if mate:
 		mate, _ = in_check(board, colour, 0)
 		if mate:
-			return KING_VALUE * (-100 - ply)
-		return KING_VALUE * 100
+			return -MATE_VALUE - ply)
+		return MATE_VALUE
 	return alpha
 
 def best_move(board, colour):
@@ -211,7 +212,7 @@ def best_move(board, colour):
 	best_board, best_ply_board, start_time = board, board, time.time()
 	for ply in xrange(1, MAX_PLY):
 		print '\nPly =', ply
-		alpha, beta = -KING_VALUE * 1000, KING_VALUE * 1000
+		alpha, beta = -MATE_VALUE * 10, MATE_VALUE * 10
 		for new_board in all_boards:
 			score = -next_move(new_board[1], -colour, -beta, -alpha, ply - 1)
 			if (time.time() - start_time) > MAX_TIME_PER_MOVE:
